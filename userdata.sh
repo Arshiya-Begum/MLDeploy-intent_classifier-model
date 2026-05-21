@@ -7,7 +7,7 @@
 # Install python dependencies using requirements.txt
 # Run the model and create .pkl file
 # Execute WSGi -> as Linux systemd service
-# Install Ngnix -> as Linux systemd service
+# Install Nginx -> as Linux systemd service
 # Enable these services - Even during restart services will go back to running state
 
 set -e
@@ -40,15 +40,15 @@ User=ubuntu
 Group=ubuntu
 WorkingDirectory=/opt/intent-app
 Environment="PATH=/opt/intent-app/.venv/bin"
-ExecStart=/opt/intent-app/.venv/bin/gunicorm --worker 3 --bind 127.0.0.1:6000 wsgi:app
+ExecStart=/opt/intent-app/.venv/bin/gunicorn --workers 3 --bind 127.0.0.1:6000 wsgi:app
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Configure ngnix reverse proxy as a Linux systemd service
-cat >/etc/ngnix/conf.d/mldeploy_intent_app.conf <<'EOF'
+# Configure nginx reverse proxy as a Linux systemd service
+cat >/etc/nginx/conf.d/mldeploy_intent_app.conf <<'EOF'
 server {
     listen 80;
     server_name _;
@@ -64,9 +64,12 @@ server {
 }
 EOF
 
-# Start and enable Linux systemd servives - Gunicorn and Ngnix
+# Disable default nginx site to avoid conflicts
+rm -f /etc/nginx/sites-enabled/default
+
+# Start and enable Linux systemd servives - Gunicorn and Nginx
 systemctl daemon-reload
 systemctl enable mldeploy_intent_gunicorn
 systemctl start mldeploy_intent_gunicorn
-systemctl enable ngnix
-systemctl restart ngnix 
+systemctl enable nginx
+systemctl restart nginx 
