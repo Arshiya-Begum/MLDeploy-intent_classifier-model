@@ -27,3 +27,20 @@ This small project demonstrates:
         "intent": "complaint",
         "probabilities": {"complaint": 0.85, "question": 0.05, ...}
     }
+
+
+AWS console\
+1. Get AMI ID 
+aws ec2 describe-images \
+> --owners 099720109477 \
+> --filters "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*" "Name=state,Values=available" \
+> --query 'Images | sort_by(@, &CreationDate)[-1].ImageId' --output text --region $AWS_REGION
+
+AMI ID
+ami-06cc5ebfb8571a147
+cat /opt/intent-app/requirements.txt
+ls /opt/intent-app/
+sudo cat /var/log/cloud-init-output.log | tail -50
+
+# restart auto scaling group
+aws autoscaling start-instance-refresh --auto-scaling-group-name mlops-autoscaling \
